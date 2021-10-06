@@ -1,13 +1,23 @@
 pipeline{
     agent any
+    //build every 5 minutes monday to friday
+    triggers {
+        cron('H/5 * * * 1-5')
+        pollSCM('*/2 * * * *')
+    }
     //tidy up the number of builds that are stored - this is limited due to memory issues
     options {
         buildDiscarder(logRotator(numToKeepStr: '2', artifactNumToKeepStr: '2'))
         timeout(time: 5, unit: 'MINUTES')
         timestamps()
     }
+    //get the current branch name to determine post steps
     environment{
         ENV = "${env.BRANCH_NAME}"
+    }
+
+    parameters{
+        string(name:'TEST', description: 'testing parameters')
     }
 
     tools{
@@ -17,16 +27,17 @@ pipeline{
     stages{
         //build the code
         stage('Build'){
-            //ignore the main branch
+            //ignore the main branch and do not build if empty
             when { 
                 not { 
-                    branch 'main' 
+                    branch 'main'                     
                 }
             }
             parallel{
                 stage('Java'){
                     steps{
                         echo 'Building Java code.....'
+                        echo "parameter to use ${params.TEST}"
                         echo "environment is ${env.ENV}"
                         sh "mvn -f ${workspace}/pipeline/pom.xml clean package -DskipTests"
                     }                    
@@ -51,7 +62,7 @@ pipeline{
             
         }
 
-
+        //execute tests except on main and release branches
         stage('Execute Tests'){
             when{
                 not{
@@ -90,7 +101,7 @@ pipeline{
                     sh "mvn -f ${workspace}/pipeline/pom.xml test"
                 }
                 post {
-                    always {
+                    always{
                         junit '**/surefire-reports/*.xml'
                     }
                 }
@@ -98,6 +109,23 @@ pipeline{
             }
         }
 
+        //require approval to deploy to QA, stage, release to put controls on quality
+        stage('Deploy approval'){
+            when{
+                anyOf{
+                    expression{ "${env.ENV}" == 'qa' }
+                    expression{ "${env.ENV}" == 'stage' }
+                    expression{ "${env.ENV}" == 'release' }
+                }
+            }
+            steps{
+                script {
+                    timeout(time: 5, unit: 'MINUTES') {
+                    input(id: "Deploy to QA", message: "Deploy ${env.ENV}?", ok: 'Deploy')
+                    }
+                }
+            }            
+        }
 
         stage('Deploy'){
             //don't deploy until build has passed
@@ -110,7 +138,7 @@ pipeline{
                 stage('Database'){
                     //agent any
                     steps{
-                        echo 'deploy the database'
+                        echo 'update the database'
                     }
                     post {
                         always {
@@ -121,7 +149,7 @@ pipeline{
                 stage('Windows'){
                     //agent any
                     steps{
-                        echo 'deploy the database'
+                        echo 'deploy to the windows server'
                     }
                     post {
                         always {
@@ -141,6 +169,6 @@ pipeline{
                     }
                 } 
              }
-        }      
+        }           
     }
 }
