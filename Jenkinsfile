@@ -1,4 +1,14 @@
 pipeline{
+
+    When{
+        Not{
+            branch 'Release'
+        }
+    }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5'))
+    }
+
     agent any
 
     tools{
@@ -12,16 +22,44 @@ pipeline{
             }
         }
 
-        stage('Test'){
-            steps{
-                sh "mvn -f ${workspace}/pipeline/pom.xml test"
-            }
-            post {
-                always {
-                    junit '**/surefire-reports/*.xml'
+        stage('Execute Tests'){
+            parallel{
+                stage('Database'){
+                    agent any
+                    steps{
+                        sh "mvn -f ${workspace}/pipeline/pom.xml test"
+                    }
+                    post {
+                        always {
+                            junit '**/surefire-reports/*.xml'
+                        }
+                    }
                 }
-            }
+                stage('Windows'){
+                    agent any
+                    steps{
+                        sh "mvn -f ${workspace}/pipeline/pom.xml test"
+                    }
+                    post {
+                        always {
+                            junit '**/surefire-reports/*.xml'
+                        }
+                    }
+                }
+                stage('Linux'){
+                    agent any
+                    steps{
+                        sh "mvn -f ${workspace}/pipeline/pom.xml test"
+                    }
+                    post {
+                        always {
+                            junit '**/surefire-reports/*.xml'
+                        }
+                    }
+                } 
+             }
         }
+
 
         stage('Deploy'){
             steps{
