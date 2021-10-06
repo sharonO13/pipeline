@@ -17,8 +17,8 @@ pipeline{
         }
 
         stage('Execute Tests'){
-            stage('Run on Linux'){
-                parallel{
+            parallel{
+                stage('Database'){
                     agent{
                         label 'Database'
                     }
@@ -30,6 +30,8 @@ pipeline{
                             junit '**/surefire-reports/*.xml'
                         }
                     }
+                }
+                stage('Windows'){
                     agent{
                         label 'Windows'
                     }
@@ -41,7 +43,9 @@ pipeline{
                             junit '**/surefire-reports/*.xml'
                         }
                     }
-                    agent{
+                }
+                stage('Linux'){
+                agent{
                         label 'Linux'
                     }
                     steps{
@@ -52,10 +56,10 @@ pipeline{
                             junit '**/surefire-reports/*.xml'
                         }
                     }
-                }
-            }
-
+                } 
+             }
         }
+
 
         stage('Deploy'){
             steps{
