@@ -14,7 +14,7 @@ pipeline{
 
         stage('Test'){
             steps{
-                sh 'mvn -f /pipeline/pipeline/pom.xml test'
+                sh "mvn -f ${workspace}/pipeline/pom.xml test"
             }
         }
 
