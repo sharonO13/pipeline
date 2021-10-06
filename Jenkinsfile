@@ -2,7 +2,8 @@ pipeline{
     agent any
     //tidy up the number of builds that are stored - this is limited due to memory issues
     options {
-        buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5'))
+        buildDiscarder(logRotator(numToKeepStr: '2', artifactNumToKeepStr: '2'))
+        timeout(time: 5, unit: 'MINUTES')
         timestamps()
     }
     environment{
