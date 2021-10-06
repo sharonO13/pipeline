@@ -121,7 +121,7 @@ pipeline{
             steps{
                 script {
                     timeout(time: 5, unit: 'MINUTES') {
-                    input(id: "Deploy to QA", message: "Deploy ${env.ENV}?", ok: 'Deploy')
+                    input(id: "Deploy", message: "Deploy ${env.ENV}?", ok: 'Deploy')
                     }
                 }
             }            
