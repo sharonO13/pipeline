@@ -5,6 +5,9 @@ pipeline{
         buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5'))
         timestamps()
     }
+    environment{
+        ENV = "${env.BRANCH_NAME}"
+    }
 
     tools{
         maven 'Maven3.5.0'
@@ -23,6 +26,7 @@ pipeline{
                 stage('Java'){
                     steps{
                         echo 'Building Java code.....'
+                        echo "environment is ${env.ENV}"
                         sh "mvn -f ${workspace}/pipeline/pom.xml clean package -DskipTests"
                     }                    
                 }
@@ -46,6 +50,14 @@ pipeline{
             
         }
 
+        when{
+            not{
+                anyOf{
+                    branch 'main'
+                    branch 'release'
+                }
+            }
+        }
         stage('Execute Tests'){
             parallel{
                 stage('Database'){
@@ -96,33 +108,33 @@ pipeline{
                 stage('Database'){
                     //agent any
                     steps{
-                        sh "mvn -f ${workspace}/pipeline/pom.xml test"
+                        echo 'deploy the database'
                     }
                     post {
                         always {
-                            junit '**/surefire-reports/*.xml'
+                            echo 'send an email on deployment'
                         }
                     }
                 }
                 stage('Windows'){
                     //agent any
                     steps{
-                        sh "mvn -f ${workspace}/pipeline/pom.xml test"
+                        echo 'deploy the database'
                     }
                     post {
                         always {
-                            junit '**/surefire-reports/*.xml'
+                            echo 'send an email on deployment'
                         }
                     }
                 }
                 stage('Linux'){
                     //agent any
                     steps{
-                        sh "mvn -f ${workspace}/pipeline/pom.xml test"
+                        echo 'deploy to docker container'
                     }
                     post {
                         always {
-                            junit '**/surefire-reports/*.xml'
+                            echo 'send email on deployment'
                         }
                     }
                 } 
