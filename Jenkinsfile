@@ -6,6 +6,7 @@ pipeline{
         timeout(time: 5, unit: 'MINUTES')
         timestamps()
     }
+    //get the current branch name to determine post steps
     environment{
         ENV = "${env.BRANCH_NAME}"
     }
@@ -17,8 +18,11 @@ pipeline{
     stages{
         //build the code
         stage('Build'){
-            //ignore the main branch
+            //ignore the main branch and do not build if empty
             when { 
+                expression {
+                    !env.currentBuild.changeSets.isEmpty()
+                }
                 not { 
                     branch 'main' 
                 }
@@ -90,11 +94,26 @@ pipeline{
                     sh "mvn -f ${workspace}/pipeline/pom.xml test"
                 }
                 post {
-                    always {
+                    always{
                         junit '**/surefire-reports/*.xml'
                     }
                 }
             } 
+            }
+        }
+
+        //require approval to deploy to QA, stage, release to put controls on quality
+        stage('Deploy approval'){
+            when{
+                anyOf{
+                    expression{ "${env.ENV}" == 'qa' }
+                    expression{ "${env.ENV}" == 'stage' }
+                    expression{ "${env.ENV}" == 'release' }
+                }
+            }
+            script {
+                timeout(time: 5, unit: 'MINUTES') {
+                input(id: "Deploy to QA", message: "Deploy ${env.ENV}?", ok: 'Deploy')
             }
         }
 
@@ -141,6 +160,12 @@ pipeline{
                     }
                 } 
              }
-        }      
+        } 
+
+        post{
+            always{
+                echo 'pipeline complete'
+            }
+        }            
     }
 }
