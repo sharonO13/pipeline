@@ -2,7 +2,7 @@ pipeline{
     agent any
     //build every 5 minutes monday to friday
     triggers {
-        cron('H/1 * * * 1-5')
+        cron('H/5 * * * 1-5')
         pollSCM('*/2 * * * *')
     }
     //tidy up the number of builds that are stored - this is limited due to memory issues
