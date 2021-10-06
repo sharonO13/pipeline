@@ -17,7 +17,7 @@ pipeline{
     }
 
     parameters{
-        String(name:'TEST', description: 'testing parameters')
+        string(name:'TEST', description: 'testing parameters')
     }
 
     tools{
