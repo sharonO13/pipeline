@@ -51,22 +51,22 @@ pipeline{
                 stage('Database'){
                     //agent any
                     steps{
-                        sh "mvn -f ${workspace}/pipeline/pom.xml test"
+                        echo 'test the database'
                     }
                     post {
                         always {
-                            junit '**/surefire-reports/*.xml'
+                            echo 'capture results'
                         }
                     }
                 }
                 stage('Windows'){
                     //agent any
                     steps{
-                        sh "mvn -f ${workspace}/pipeline/pom.xml test"
+                        echo 'test the windows build with NUnit'
                     }
                     post {
                         always {
-                            junit '**/surefire-reports/*.xml'
+                            echo 'capture results'
                         }
                     }
                 }
