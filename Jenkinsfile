@@ -8,13 +8,13 @@ pipeline{
     stages{
         stage('Build'){
             steps{
-                sh 'mvn -B -DskipTests -f /pipeline/pipeline clean package'
+                sh 'mvn -f /pipeline/pipeline/pom.xml clean install'
             }
         }
 
         stage('Test'){
             steps{
-                sh 'mvn -f /pipeline/pipeline test'
+                sh 'mvn -f /pipeline/pipeline/pom.xml test'
             }
         }
 
