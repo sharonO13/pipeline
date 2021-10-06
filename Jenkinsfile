@@ -20,11 +20,8 @@ pipeline{
         stage('Build'){
             //ignore the main branch and do not build if empty
             when { 
-                expression {
-                    !env.currentBuild.changeSets.isEmpty()
-                }
                 not { 
-                    branch 'main' 
+                    branch 'main'                     
                 }
             }
             parallel{
