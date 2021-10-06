@@ -2,13 +2,13 @@ pipeline{
     agent any
     //tidy up the number of builds that are stored - this is limited due to memory issues
     options {
-        buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5'))
+        buildDiscarder(logRotator(numToKeepStr: '2', artifactNumToKeepStr: '2'))
+        timeout(time: 5, unit: 'MINUTES')
         timestamps()
     }
-
     environment{
-
-    }    
+        ENV = "${env.BRANCH_NAME}"
+    }
 
     tools{
         maven 'Maven3.5.0'
@@ -17,10 +17,17 @@ pipeline{
     stages{
         //build the code
         stage('Build'){
+            //ignore the main branch
+            when { 
+                not { 
+                    branch 'main' 
+                }
+            }
             parallel{
                 stage('Java'){
                     steps{
                         echo 'Building Java code.....'
+                        echo "environment is ${env.ENV}"
                         sh "mvn -f ${workspace}/pipeline/pom.xml clean package -DskipTests"
                     }                    
                 }
@@ -44,42 +51,51 @@ pipeline{
             
         }
 
+
         stage('Execute Tests'){
+            when{
+                not{
+                    anyOf{
+                        branch 'main'
+                        branch 'release'
+                    }
+                }
+            }
             parallel{
-                stage('Database'){
-                    //agent any
-                    steps{
-                        sh "mvn -f ${workspace}/pipeline/pom.xml test"
-                    }
-                    post {
-                        always {
-                            junit '**/surefire-reports/*.xml'
-                        }
+            stage('Database'){
+                //agent any
+                steps{
+                    echo 'test the database'
+                }
+                post {
+                    always {
+                        echo 'capture results'
                     }
                 }
-                stage('Windows'){
-                    //agent any
-                    steps{
-                        sh "mvn -f ${workspace}/pipeline/pom.xml test"
-                    }
-                    post {
-                        always {
-                            junit '**/surefire-reports/*.xml'
-                        }
+            }
+            stage('Windows'){
+                //agent any
+                steps{
+                    echo 'test the windows build with NUnit'
+                }
+                post {
+                    always {
+                        echo 'capture results'
                     }
                 }
-                stage('Linux'){
-                    //agent any
-                    steps{
-                        sh "mvn -f ${workspace}/pipeline/pom.xml test"
+            }
+            stage('Linux'){
+                //agent any
+                steps{
+                    sh "mvn -f ${workspace}/pipeline/pom.xml test"
+                }
+                post {
+                    always {
+                        junit '**/surefire-reports/*.xml'
                     }
-                    post {
-                        always {
-                            junit '**/surefire-reports/*.xml'
-                        }
-                    }
-                } 
-             }
+                }
+            } 
+            }
         }
 
 
@@ -94,33 +110,33 @@ pipeline{
                 stage('Database'){
                     //agent any
                     steps{
-                        sh "mvn -f ${workspace}/pipeline/pom.xml test"
+                        echo 'deploy the database'
                     }
                     post {
                         always {
-                            junit '**/surefire-reports/*.xml'
+                            echo 'send an email on deployment'
                         }
                     }
                 }
                 stage('Windows'){
                     //agent any
                     steps{
-                        sh "mvn -f ${workspace}/pipeline/pom.xml test"
+                        echo 'deploy the database'
                     }
                     post {
                         always {
-                            junit '**/surefire-reports/*.xml'
+                            echo 'send an email on deployment'
                         }
                     }
                 }
                 stage('Linux'){
                     //agent any
                     steps{
-                        sh "mvn -f ${workspace}/pipeline/pom.xml test"
+                        echo 'deploy to docker container'
                     }
                     post {
                         always {
-                            junit '**/surefire-reports/*.xml'
+                            echo 'send email on deployment'
                         }
                     }
                 } 
