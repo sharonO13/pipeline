@@ -12,15 +12,45 @@ pipeline{
             }
         }
 
-        stage('Test'){
-            steps{
-                sh "mvn -f ${workspace}/pipeline/pom.xml test"
-            }
-            post {
-                always {
-                    junit '**/surefire-reports/*.xml'
+        stage('Execute Tests'){
+            stage('Run on Linux'){
+                parallel{
+                    agent{
+                        label 'Database'
+                    }
+                    steps{
+                        sh "mvn -f ${workspace}/pipeline/pom.xml test"
+                    }
+                    post {
+                        always {
+                            junit '**/surefire-reports/*.xml'
+                        }
+                    }
+                    agent{
+                        label 'Windows'
+                    }
+                    steps{
+                        sh "mvn -f ${workspace}/pipeline/pom.xml test"
+                    }
+                    post {
+                        always {
+                            junit '**/surefire-reports/*.xml'
+                        }
+                    }
+                    agent{
+                        label 'Linux'
+                    }
+                    steps{
+                        sh "mvn -f ${workspace}/pipeline/pom.xml test"
+                    }
+                    post {
+                        always {
+                            junit '**/surefire-reports/*.xml'
+                        }
+                    }
                 }
             }
+
         }
 
         stage('Deploy'){
