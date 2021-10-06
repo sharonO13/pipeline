@@ -129,7 +129,7 @@ pipeline{
                 stage('Database'){
                     //agent any
                     steps{
-                        echo 'deploy the database'
+                        echo 'update the database'
                     }
                     post {
                         always {
@@ -140,7 +140,7 @@ pipeline{
                 stage('Windows'){
                     //agent any
                     steps{
-                        echo 'deploy the database'
+                        echo 'deploy to the windows server'
                     }
                     post {
                         always {
