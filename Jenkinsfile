@@ -6,10 +6,6 @@ pipeline{
         timestamps()
     }
 
-    environment{
-
-    }    
-
     tools{
         maven 'Maven3.5.0'
     }
@@ -17,6 +13,12 @@ pipeline{
     stages{
         //build the code
         stage('Build'){
+            //ignore the main branch
+            when { 
+                not { 
+                    branch 'main' 
+                }
+            }
             parallel{
                 stage('Java'){
                     steps{
