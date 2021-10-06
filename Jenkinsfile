@@ -55,7 +55,7 @@ pipeline{
             
         }
 
-
+        //execute tests except on main and release branches
         stage('Execute Tests'){
             when{
                 not{
@@ -116,6 +116,7 @@ pipeline{
                 input(id: "Deploy to QA", message: "Deploy ${env.ENV}?", ok: 'Deploy')
                 }
             }
+        }
 
 
         stage('Deploy'){
