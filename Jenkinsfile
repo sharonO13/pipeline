@@ -6,10 +6,6 @@ pipeline{
         timestamps()
     }
 
-    environment{
-
-    }    
-
     tools{
         maven 'Maven3.5.0'
     }
