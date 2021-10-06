@@ -16,6 +16,11 @@ pipeline{
             steps{
                 sh "mvn -f ${workspace}/pipeline/pom.xml test"
             }
+            post {
+                always {
+                    junit '**/surefire-reports/*.xml'
+                }
+            }
         }
 
         stage('Deploy'){
