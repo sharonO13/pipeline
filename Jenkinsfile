@@ -17,6 +17,12 @@ pipeline{
     stages{
         //build the code
         stage('Build'){
+            //ignore the main branch
+            when { 
+                not { 
+                    branch 'main' 
+                }
+            }
             parallel{
                 stage('Java'){
                     steps{
