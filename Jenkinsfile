@@ -1,5 +1,10 @@
 pipeline{
     agent any
+    //build every 5 minutes monday to friday
+    triggers {
+        cron('H/1 * * * 1-5')
+        pollSCM('*/2 * * * *')
+    }
     //tidy up the number of builds that are stored - this is limited due to memory issues
     options {
         buildDiscarder(logRotator(numToKeepStr: '2', artifactNumToKeepStr: '2'))
@@ -9,6 +14,10 @@ pipeline{
     //get the current branch name to determine post steps
     environment{
         ENV = "${env.BRANCH_NAME}"
+    }
+
+    parameters{
+        String(name:'TEST', description: 'testing parameters')
     }
 
     tools{
@@ -28,6 +37,7 @@ pipeline{
                 stage('Java'){
                     steps{
                         echo 'Building Java code.....'
+                        echo "parameter to use ${params.TEST}"
                         echo "environment is ${env.ENV}"
                         sh "mvn -f ${workspace}/pipeline/pom.xml clean package -DskipTests"
                     }                    
