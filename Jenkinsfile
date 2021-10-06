@@ -19,9 +19,7 @@ pipeline{
         stage('Execute Tests'){
             parallel{
                 stage('Database'){
-                    agent{
-                        label 'Database'
-                    }
+                    agent any
                     steps{
                         sh "mvn -f ${workspace}/pipeline/pom.xml test"
                     }
@@ -32,9 +30,7 @@ pipeline{
                     }
                 }
                 stage('Windows'){
-                    agent{
-                        label 'Windows'
-                    }
+                    agent any
                     steps{
                         sh "mvn -f ${workspace}/pipeline/pom.xml test"
                     }
@@ -45,9 +41,7 @@ pipeline{
                     }
                 }
                 stage('Linux'){
-                agent{
-                        label 'Linux'
-                    }
+                    agent any
                     steps{
                         sh "mvn -f ${workspace}/pipeline/pom.xml test"
                     }
