@@ -50,50 +50,51 @@ pipeline{
             
         }
 
-        when{
-            not{
-                anyOf{
-                    branch 'main'
-                    branch 'release'
+
+        stage('Execute Tests'){
+            when{
+                not{
+                    anyOf{
+                        branch 'main'
+                        branch 'release'
+                    }
                 }
             }
-        }
-        stage('Execute Tests'){
             parallel{
-                stage('Database'){
-                    //agent any
-                    steps{
-                        echo 'test the database'
-                    }
-                    post {
-                        always {
-                            echo 'capture results'
-                        }
+            stage('Database'){
+                //agent any
+                steps{
+                    echo 'test the database'
+                }
+                post {
+                    always {
+                        echo 'capture results'
                     }
                 }
-                stage('Windows'){
-                    //agent any
-                    steps{
-                        echo 'test the windows build with NUnit'
-                    }
-                    post {
-                        always {
-                            echo 'capture results'
-                        }
+            }
+            stage('Windows'){
+                //agent any
+                steps{
+                    echo 'test the windows build with NUnit'
+                }
+                post {
+                    always {
+                        echo 'capture results'
                     }
                 }
-                stage('Linux'){
-                    //agent any
-                    steps{
-                        sh "mvn -f ${workspace}/pipeline/pom.xml test"
+            }
+            stage('Linux'){
+                //agent any
+                steps{
+                    sh "mvn -f ${workspace}/pipeline/pom.xml test"
+                }
+                post {
+                    always {
+                        junit '**/surefire-reports/*.xml'
                     }
-                    post {
-                        always {
-                            junit '**/surefire-reports/*.xml'
-                        }
-                    }
-                } 
-             }
+                }
+            } 
+            }
         }
 
 
