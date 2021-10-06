@@ -111,13 +111,14 @@ pipeline{
                     expression{ "${env.ENV}" == 'release' }
                 }
             }
-            script {
-                timeout(time: 5, unit: 'MINUTES') {
-                input(id: "Deploy to QA", message: "Deploy ${env.ENV}?", ok: 'Deploy')
+            Steps{
+                script {
+                    timeout(time: 5, unit: 'MINUTES') {
+                    input(id: "Deploy to QA", message: "Deploy ${env.ENV}?", ok: 'Deploy')
+                    }
                 }
-            }
+            }            
         }
-
 
         stage('Deploy'){
             //don't deploy until build has passed
