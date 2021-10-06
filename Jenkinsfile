@@ -2,19 +2,19 @@ pipeline{
     agent any
 
     tools{
-        maven '3.3.9'
+        maven 'Maven3.5.0'
     }
     
     stages{
         stage('Build'){
             steps{
-                sh 'mvn -B -DskipTests clean package'
+                sh "mvn -f ${workspace}/pipeline/pom.xml clean package -DskipTests"
             }
         }
 
         stage('Test'){
             steps{
-                sh 'mvn test'
+                sh "mvn -f ${workspace}/pipeline/pom.xml test"
             }
         }
 
